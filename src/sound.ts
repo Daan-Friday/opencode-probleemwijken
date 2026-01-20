@@ -10,7 +10,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 // Supported audio formats
 const SUPPORTED_EXTENSIONS = [".mp3", ".wav", ".ogg", ".m4a", ".aac", ".flac"]
 
-function getBundledSoundsDir(): string {
+function getBundledSoundsDir(): string | null {
   const possiblePaths = [
     join(__dirname, "..", "sounds"),
     join(__dirname, "sounds"),
@@ -22,17 +22,10 @@ function getBundledSoundsDir(): string {
     }
   }
 
-  return join(__dirname, "..", "sounds")
+  return null
 }
 
-function getSoundsDirectory(config: SoundboardConfig): string {
-  if (config.soundsDir && existsSync(config.soundsDir)) {
-    return config.soundsDir
-  }
-  return getBundledSoundsDir()
-}
-
-function getSoundFiles(directory: string): string[] {
+function getSoundFilesFromDir(directory: string): string[] {
   if (!existsSync(directory)) {
     return []
   }
@@ -48,6 +41,25 @@ function getSoundFiles(directory: string): string[] {
   } catch {
     return []
   }
+}
+
+function getAllSoundFiles(config: SoundboardConfig): string[] {
+  const allSounds: string[] = []
+
+  // Add bundled Probleemwijken sounds if enabled
+  if (config.includeBundledSounds) {
+    const bundledDir = getBundledSoundsDir()
+    if (bundledDir) {
+      allSounds.push(...getSoundFilesFromDir(bundledDir))
+    }
+  }
+
+  // Add custom sounds if directory is configured
+  if (config.customSoundsDir && existsSync(config.customSoundsDir)) {
+    allSounds.push(...getSoundFilesFromDir(config.customSoundsDir))
+  }
+
+  return allSounds
 }
 
 function getRandomSound(sounds: string[]): string | null {
@@ -133,8 +145,7 @@ async function playOnWindows(soundPath: string): Promise<void> {
 }
 
 export async function playRandomSound(config: SoundboardConfig): Promise<void> {
-  const soundsDir = getSoundsDirectory(config)
-  const sounds = getSoundFiles(soundsDir)
+  const sounds = getAllSoundFiles(config)
 
   if (sounds.length === 0) {
     return

@@ -4,7 +4,8 @@ import { homedir } from "os"
 
 export interface SoundboardConfig {
   enabled: boolean
-  soundsDir: string | null // Custom sounds directory, null = use bundled
+  customSoundsDir: string | null // Custom sounds directory for your own sounds
+  includeBundledSounds: boolean // Include the bundled Probleemwijken sounds
   events: {
     complete: boolean
     subagent_complete: boolean
@@ -15,7 +16,8 @@ export interface SoundboardConfig {
 
 const DEFAULT_CONFIG: SoundboardConfig = {
   enabled: true,
-  soundsDir: null,
+  customSoundsDir: null,
+  includeBundledSounds: true,
   events: {
     complete: true,
     subagent_complete: false,
@@ -27,9 +29,21 @@ const DEFAULT_CONFIG: SoundboardConfig = {
 export type EventType = "complete" | "subagent_complete" | "error" | "permission"
 
 export function loadConfig(): SoundboardConfig {
-  const configPath = join(homedir(), ".config", "opencode", "random-soundboard.json")
+  // Try both config file names for compatibility
+  const configPaths = [
+    join(homedir(), ".config", "opencode", "probleemwijken.json"),
+    join(homedir(), ".config", "opencode", "random-soundboard.json"),
+  ]
 
-  if (!existsSync(configPath)) {
+  let configPath: string | null = null
+  for (const path of configPaths) {
+    if (existsSync(path)) {
+      configPath = path
+      break
+    }
+  }
+
+  if (!configPath) {
     return DEFAULT_CONFIG
   }
 
@@ -39,7 +53,8 @@ export function loadConfig(): SoundboardConfig {
 
     return {
       enabled: userConfig.enabled ?? DEFAULT_CONFIG.enabled,
-      soundsDir: userConfig.soundsDir ?? DEFAULT_CONFIG.soundsDir,
+      customSoundsDir: userConfig.customSoundsDir ?? DEFAULT_CONFIG.customSoundsDir,
+      includeBundledSounds: userConfig.includeBundledSounds ?? DEFAULT_CONFIG.includeBundledSounds,
       events: {
         complete: userConfig.events?.complete ?? DEFAULT_CONFIG.events.complete,
         subagent_complete: userConfig.events?.subagent_complete ?? DEFAULT_CONFIG.events.subagent_complete,
