@@ -4,44 +4,29 @@ OpenCode plugin dat een willekeurig geluid afspeelt van de legendarische [Proble
 
 ## Installatie
 
-### Optie 1: Lokale plugin (aanbevolen)
-
-1. Kopieer `plugin.ts` naar je OpenCode plugins directory:
-
-```bash
-cp plugin.ts ~/.config/opencode/plugins/probleemwijken.ts
-```
-
-2. Kopieer de sounds naar je config directory:
-
-```bash
-mkdir -p ~/.config/opencode/sounds/random-soundboard
-cp sounds/*.mp3 ~/.config/opencode/sounds/random-soundboard/
-```
-
-3. Zorg dat je `@opencode-ai/plugin` hebt in `~/.config/opencode/package.json`:
+Voeg de plugin toe aan je `opencode.json`:
 
 ```json
 {
-  "dependencies": {
-    "@opencode-ai/plugin": "^1.0.0"
-  }
+  "plugin": ["opencode-probleemwijken@latest"]
 }
 ```
 
-4. Herstart OpenCode
+Herstart OpenCode en je bent klaar!
 
-### Optie 2: Eigen geluiden toevoegen
+### Specifieke versie
 
-Je kunt ook je eigen MP3/WAV/OGG/M4A bestanden toevoegen aan de `~/.config/opencode/sounds/random-soundboard/` directory.
+```json
+{
+  "plugin": ["opencode-probleemwijken@1.0.0"]
+}
+```
 
 ## Wat doet het?
 
-Elke keer als OpenCode klaar is met een taak (session.idle) of een error krijgt (session.error), speelt de plugin een willekeurig geluid af uit de collectie.
+Elke keer als OpenCode klaar is met een taak (`session.idle`) of een error krijgt (`session.error`), speelt de plugin een willekeurig geluid af uit de collectie van 36 klassieke Derkolk soundboard fragmenten.
 
 ## Geluiden
-
-De plugin bevat 36 klassieke Derkolk soundboard fragmenten:
 
 - "VLIEG!"
 - "Half elf"
@@ -51,13 +36,33 @@ De plugin bevat 36 klassieke Derkolk soundboard fragmenten:
 - "Koffie"
 - "Pitbull"
 - "Tetete"
-- ... en nog veel meer!
+- "Kakwijk"
+- "Doei Henk"
+- ... en nog 26 meer!
 
 ## Platform ondersteuning
 
-- **macOS**: Gebruikt `afplay` (ingebouwd)
-- **Linux**: Gebruikt `mpv` of `ffplay`
-- **Windows**: Gebruikt Windows Media Player via PowerShell
+| Platform | Audio player |
+|----------|--------------|
+| macOS | `afplay` (ingebouwd) |
+| Linux | `mpv` of `ffplay` |
+| Windows | Windows Media Player via PowerShell |
+
+## Configuratie (optioneel)
+
+Maak `~/.config/opencode/probleemwijken.json` om events aan/uit te zetten:
+
+```json
+{
+  "enabled": true,
+  "events": {
+    "complete": true,
+    "subagent_complete": false,
+    "error": true,
+    "permission": false
+  }
+}
+```
 
 ## Credits
 
