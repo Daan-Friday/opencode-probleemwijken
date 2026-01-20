@@ -1,0 +1,45 @@
+{
+  "name": "opencode-probleemwijken",
+  "version": "0.1.0",
+  "description": "OpenCode plugin that plays a random Probleemwijken/Derkolk soundboard sound when a session completes",
+  "author": "Daan-Friday",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Daan-Friday/opencode-probleemwijken.git"
+  },
+  "homepage": "https://github.com/Daan-Friday/opencode-probleemwijken#readme",
+  "bugs": {
+    "url": "https://github.com/Daan-Friday/opencode-probleemwijken/issues"
+  },
+  "files": [
+    "dist",
+    "sounds"
+  ],
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "prepublishOnly": "bun run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "soundboard",
+    "random",
+    "sound",
+    "notifications",
+    "probleemwijken",
+    "derkolk"
+  ],
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.0.224",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=1.0.0"
+  }
+}
