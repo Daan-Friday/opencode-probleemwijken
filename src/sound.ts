@@ -78,13 +78,23 @@ async function runCommand(command: string, args: string[]): Promise<void> {
 }
 
 async function playOnLinux(soundPath: string): Promise<void> {
-  // Try different players - mpv and ffplay support most formats
-  const players = [
+  const ext = extname(soundPath).toLowerCase()
+  const isWav = ext === ".wav"
+
+  // Players that support all formats (MP3, OGG, etc.)
+  const universalPlayers = [
     { command: "mpv", args: ["--no-video", "--no-terminal", soundPath] },
     { command: "ffplay", args: ["-nodisp", "-autoexit", "-loglevel", "quiet", soundPath] },
-    { command: "paplay", args: [soundPath] }, // PulseAudio - mainly for wav
-    { command: "aplay", args: [soundPath] }, // ALSA - mainly for wav
+    { command: "cvlc", args: ["--play-and-exit", "--no-video", "-q", soundPath] }, // VLC command line
   ]
+
+  // Players that only support WAV (paplay/aplay produce noise with MP3!)
+  const wavOnlyPlayers = [
+    { command: "paplay", args: [soundPath] }, // PulseAudio
+    { command: "aplay", args: [soundPath] }, // ALSA
+  ]
+
+  const players = isWav ? [...universalPlayers, ...wavOnlyPlayers] : universalPlayers
 
   for (const player of players) {
     try {

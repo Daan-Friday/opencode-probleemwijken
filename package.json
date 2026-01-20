@@ -1,6 +1,6 @@
 {
   "name": "opencode-probleemwijken",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "OpenCode plugin that plays a random Probleemwijken/Derkolk soundboard sound when a session completes",
   "author": "Daan-Friday",
   "license": "MIT",
