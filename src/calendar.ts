@@ -1,4 +1,5 @@
 import type { SchaamModusConfig } from "./config"
+import { refreshAccessToken, hasValidTokens } from "./auth"
 
 interface CalendarEvent {
   start: Date
@@ -79,7 +80,7 @@ function parseICalEvents(icalData: string): CalendarEvent[] {
   return events
 }
 
-async function fetchCalendar(url: string): Promise<CalendarEvent[]> {
+async function fetchCalendarViaIcal(url: string): Promise<CalendarEvent[]> {
   try {
     const response = await fetch(url)
     if (!response.ok) {
@@ -92,8 +93,75 @@ async function fetchCalendar(url: string): Promise<CalendarEvent[]> {
   }
 }
 
+async function fetchCalendarViaOAuth(): Promise<CalendarEvent[]> {
+  const accessToken = await refreshAccessToken()
+  
+  if (!accessToken) {
+    return []
+  }
+  
+  try {
+    // Get events from now to end of day
+    const now = new Date()
+    const endOfDay = new Date()
+    endOfDay.setHours(23, 59, 59, 999)
+    
+    const params = new URLSearchParams({
+      timeMin: now.toISOString(),
+      timeMax: endOfDay.toISOString(),
+      singleEvents: "true",
+      orderBy: "startTime",
+    })
+    
+    const response = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    )
+    
+    if (!response.ok) {
+      return []
+    }
+    
+    const data = await response.json()
+    const events: CalendarEvent[] = []
+    
+    for (const item of data.items || []) {
+      // Skip cancelled events
+      if (item.status === "cancelled") continue
+      
+      const start = item.start?.dateTime 
+        ? new Date(item.start.dateTime)
+        : item.start?.date 
+          ? new Date(item.start.date)
+          : null
+          
+      const end = item.end?.dateTime
+        ? new Date(item.end.dateTime)
+        : item.end?.date
+          ? new Date(item.end.date)
+          : null
+      
+      if (start && end) {
+        events.push({
+          start,
+          end,
+          summary: item.summary || "Busy",
+        })
+      }
+    }
+    
+    return events
+  } catch {
+    return []
+  }
+}
+
 export async function isInMeeting(config: SchaamModusConfig): Promise<boolean> {
-  if (!config.enabled || !config.calendarUrl) {
+  if (!config.enabled) {
     return false
   }
   
@@ -102,7 +170,15 @@ export async function isInMeeting(config: SchaamModusConfig): Promise<boolean> {
   
   // Refresh cache if expired
   if (now - lastFetch > cacheExpiry) {
-    cachedEvents = await fetchCalendar(config.calendarUrl)
+    // Prefer OAuth if tokens are available
+    if (hasValidTokens()) {
+      cachedEvents = await fetchCalendarViaOAuth()
+    } else if (config.calendarUrl) {
+      // Fall back to iCal URL
+      cachedEvents = await fetchCalendarViaIcal(config.calendarUrl)
+    } else {
+      cachedEvents = []
+    }
     lastFetch = now
   }
   

@@ -149,7 +149,46 @@ De plugin kiest dan random uit zowel de Probleemwijken geluiden als je eigen gel
 
 Zit je in een meeting en wil je niet dat je collega's "VLIEG!" horen? Schaam-modus detecteert automatisch of je in een meeting zit via je Google Calendar en speelt dan een subtiel BOING geluidje in plaats van Probleemwijken.
 
-### Setup
+### Optie 1: OAuth (aanbevolen)
+
+De makkelijkste manier - log direct in met Google!
+
+**Stap 1: Google Cloud Project aanmaken**
+
+1. Ga naar [Google Cloud Console](https://console.cloud.google.com/)
+2. Maak een nieuw project aan
+3. Ga naar **APIs & Services** → **Enable APIs** → Zoek **Google Calendar API** → Enable
+4. Ga naar **APIs & Services** → **Credentials** → **Create Credentials** → **OAuth client ID**
+5. Kies **Desktop app** als application type
+6. Kopieer de **Client ID** en **Client Secret**
+
+**Stap 2: Configureer de plugin**
+
+Voeg toe aan `~/.config/opencode/probleemwijken.json`:
+
+```json
+{
+  "schaamModus": {
+    "enabled": true,
+    "oauth": {
+      "clientId": "123456789-abc123.apps.googleusercontent.com",
+      "clientSecret": "GOCSPX-abc123xyz"
+    }
+  }
+}
+```
+
+**Stap 3: Verbind met Google**
+
+Vraag in OpenCode:
+> "Run de schaam_modus_setup tool"
+
+Of check de status:
+> "Run de schaam_modus_status tool"
+
+De browser opent automatisch om in te loggen met Google. Klaar!
+
+### Optie 2: iCal URL (simpeler, geen OAuth nodig)
 
 1. Ga naar [Google Calendar](https://calendar.google.com)
 2. Klik op de 3 puntjes naast je kalender → **Instellingen en delen**
@@ -174,6 +213,15 @@ Zit je in een meeting en wil je niet dat je collega's "VLIEG!" horen? Schaam-mod
 | In meeting | Subtiel BOING | Nee |
 
 De calendar wordt elke X minuten gecached (standaard 5 minuten) om API calls te minimaliseren.
+
+### Custom Tools
+
+De plugin voegt twee tools toe aan OpenCode:
+
+| Tool | Beschrijving |
+|------|--------------|
+| `schaam_modus_setup` | Start de Google OAuth flow om je kalender te verbinden |
+| `schaam_modus_status` | Bekijk de huidige schaam-modus status en of je in een meeting zit |
 
 ## Credits
 

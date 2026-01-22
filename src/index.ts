@@ -1,9 +1,10 @@
-import type { Plugin, PluginInput } from "@opencode-ai/plugin"
+import { type Plugin, type PluginInput, tool } from "@opencode-ai/plugin"
 import { loadConfig, isSoundEnabled, isNotificationEnabled, getMessage } from "./config"
 import type { EventType, SoundboardConfig } from "./config"
 import { playRandomSound, playBoingSound } from "./sound"
 import { sendNotification } from "./notify"
 import { isInMeeting } from "./calendar"
+import { startOAuthFlow, isOAuthConfigured, hasValidTokens } from "./auth"
 
 function getSessionIDFromEvent(event: unknown): string | null {
   const sessionID = (event as any)?.properties?.sessionID
@@ -61,6 +62,77 @@ export const RandomSoundboardPlugin: Plugin = async ({ client, directory }) => {
   const projectName = directory ? directory.split("/").pop() ?? null : null
 
   return {
+    tool: {
+      schaam_modus_setup: tool({
+        description: "Connect your Google Calendar for schaam-modus. This will open a browser window to authenticate with Google.",
+        args: {},
+        async execute() {
+          if (!isOAuthConfigured()) {
+            return `OAuth is not configured. Please add your Google OAuth credentials to ~/.config/opencode/probleemwijken.json:
+
+{
+  "schaamModus": {
+    "enabled": true,
+    "oauth": {
+      "clientId": "your-client-id.apps.googleusercontent.com",
+      "clientSecret": "your-client-secret"
+    }
+  }
+}
+
+See: https://github.com/Daan-Friday/opencode-probleemwijken#oauth-setup`
+          }
+
+          if (hasValidTokens()) {
+            return "Schaam-modus is already connected to Google Calendar! Your calendar will be checked automatically."
+          }
+
+          const success = await startOAuthFlow()
+          
+          if (success) {
+            return "Schaam-modus is now connected to Google Calendar! When you're in a meeting, you'll hear a subtle BOING instead of Probleemwijken sounds."
+          } else {
+            return "Authentication failed. Please try again."
+          }
+        },
+      }),
+      
+      schaam_modus_status: tool({
+        description: "Check the status of schaam-modus and Google Calendar connection",
+        args: {},
+        async execute() {
+          const currentConfig = loadConfig()
+          
+          const status = {
+            enabled: currentConfig.schaamModus.enabled,
+            oauthConfigured: isOAuthConfigured(),
+            calendarConnected: hasValidTokens(),
+            icalUrlConfigured: !!currentConfig.schaamModus.calendarUrl,
+          }
+          
+          let message = `Schaam-modus status:\n`
+          message += `- Enabled: ${status.enabled ? "Yes" : "No"}\n`
+          message += `- OAuth configured: ${status.oauthConfigured ? "Yes" : "No"}\n`
+          message += `- Google Calendar connected: ${status.calendarConnected ? "Yes" : "No"}\n`
+          message += `- iCal URL configured: ${status.icalUrlConfigured ? "Yes" : "No"}\n`
+          
+          if (!status.enabled) {
+            message += `\nTo enable, set "schaamModus.enabled": true in your config.`
+          } else if (!status.calendarConnected && !status.icalUrlConfigured) {
+            message += `\nTo connect Google Calendar, run the schaam_modus_setup tool or add an iCal URL to your config.`
+          }
+          
+          // Check if currently in meeting
+          if (status.enabled && (status.calendarConnected || status.icalUrlConfigured)) {
+            const inMeeting = await isInMeeting(currentConfig.schaamModus)
+            message += `\n- Currently in meeting: ${inMeeting ? "Yes (BOING mode)" : "No (Probleemwijken mode)"}`
+          }
+          
+          return message
+        },
+      }),
+    },
+    
     event: async ({ event }) => {
       // Permission event
       if (event.type === "permission.updated" || (event as any).type === "permission.asked") {
