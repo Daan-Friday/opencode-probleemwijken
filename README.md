@@ -145,6 +145,36 @@ De plugin kiest dan random uit zowel de Probleemwijken geluiden als je eigen gel
 }
 ```
 
+## Schaam-modus
+
+Zit je in een meeting en wil je niet dat je collega's "VLIEG!" horen? Schaam-modus detecteert automatisch of je in een meeting zit via je Google Calendar en speelt dan een subtiel BOING geluidje in plaats van Probleemwijken.
+
+### Setup
+
+1. Ga naar [Google Calendar](https://calendar.google.com)
+2. Klik op de 3 puntjes naast je kalender → **Instellingen en delen**
+3. Scroll naar **Agenda integreren** → Kopieer de **Geheim adres in iCal-indeling**
+4. Voeg toe aan je config:
+
+```json
+{
+  "schaamModus": {
+    "enabled": true,
+    "calendarUrl": "https://calendar.google.com/calendar/ical/jouw-email%40gmail.com/private-abc123/basic.ics",
+    "checkIntervalMinutes": 5
+  }
+}
+```
+
+### Hoe werkt het?
+
+| Situatie | Geluid | Notificatie |
+|----------|--------|-------------|
+| Geen meeting | Random Probleemwijken | Ja |
+| In meeting | Subtiel BOING | Nee |
+
+De calendar wordt elke X minuten gecached (standaard 5 minuten) om API calls te minimaliseren.
+
 ## Credits
 
 - Geluiden van [derkolk.nl/probleemwijken](https://www.derkolk.nl/probleemwijken/)

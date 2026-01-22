@@ -7,6 +7,12 @@ export interface EventConfig {
   notification: boolean
 }
 
+export interface SchaamModusConfig {
+  enabled: boolean
+  calendarUrl: string | null // Google Calendar iCal URL
+  checkIntervalMinutes: number // How often to refresh calendar data
+}
+
 export interface SoundboardConfig {
   enabled: boolean
   customSoundsDir: string | null // Custom sounds directory for your own sounds
@@ -15,6 +21,7 @@ export interface SoundboardConfig {
     enabled: boolean
     timeout: number // Notification timeout in seconds (Linux only)
   }
+  schaamModus: SchaamModusConfig
   events: {
     complete: EventConfig
     subagent_complete: EventConfig
@@ -36,6 +43,11 @@ const DEFAULT_CONFIG: SoundboardConfig = {
   notifications: {
     enabled: true,
     timeout: 5,
+  },
+  schaamModus: {
+    enabled: false,
+    calendarUrl: null,
+    checkIntervalMinutes: 5,
   },
   events: {
     complete: { sound: true, notification: true },
@@ -97,6 +109,11 @@ export function loadConfig(): SoundboardConfig {
       notifications: {
         enabled: userConfig.notifications?.enabled ?? DEFAULT_CONFIG.notifications.enabled,
         timeout: userConfig.notifications?.timeout ?? DEFAULT_CONFIG.notifications.timeout,
+      },
+      schaamModus: {
+        enabled: userConfig.schaamModus?.enabled ?? DEFAULT_CONFIG.schaamModus.enabled,
+        calendarUrl: userConfig.schaamModus?.calendarUrl ?? DEFAULT_CONFIG.schaamModus.calendarUrl,
+        checkIntervalMinutes: userConfig.schaamModus?.checkIntervalMinutes ?? DEFAULT_CONFIG.schaamModus.checkIntervalMinutes,
       },
       events: {
         complete: parseEventConfig(userConfig.events?.complete, DEFAULT_CONFIG.events.complete),
