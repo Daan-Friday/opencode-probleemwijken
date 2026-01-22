@@ -1,6 +1,6 @@
 # opencode-probleemwijken
 
-OpenCode plugin dat een willekeurig geluid afspeelt van de legendarische [Probleemwijken/Derkolk soundboard](https://www.derkolk.nl/probleemwijken/) wanneer een sessie klaar is.
+OpenCode plugin dat een willekeurig geluid afspeelt en push notificaties stuurt van de legendarische [Probleemwijken/Derkolk soundboard](https://www.derkolk.nl/probleemwijken/) wanneer een sessie klaar is.
 
 ## Installatie
 
@@ -24,7 +24,9 @@ Herstart OpenCode en je bent klaar!
 
 ## Wat doet het?
 
-Elke keer als OpenCode klaar is met een taak (`session.idle`) of een error krijgt (`session.error`), speelt de plugin een willekeurig geluid af uit de collectie van 36 klassieke Derkolk soundboard fragmenten.
+Elke keer als OpenCode klaar is met een taak (`session.idle`) of een error krijgt (`session.error`):
+- Speelt een willekeurig geluid af uit de collectie van 36 klassieke Derkolk soundboard fragmenten
+- Stuurt een push notificatie naar je desktop
 
 ## Geluiden
 
@@ -42,11 +44,11 @@ Elke keer als OpenCode klaar is met een taak (`session.idle`) of een error krijg
 
 ## Platform ondersteuning
 
-| Platform | Audio player |
-|----------|--------------|
-| macOS | `afplay` (ingebouwd) |
-| Linux | `mpv` of `ffplay` |
-| Windows | Windows Media Player via PowerShell |
+| Platform | Audio | Notificaties |
+|----------|-------|--------------|
+| macOS | `afplay` (ingebouwd) | `osascript` (ingebouwd) |
+| Linux | `mpv` of `ffplay` | `notify-send` |
+| Windows | Windows Media Player | Windows Toast Notifications |
 
 ## Configuratie (optioneel)
 
@@ -56,12 +58,22 @@ Maak `~/.config/opencode/probleemwijken.json`:
 {
   "enabled": true,
   "includeBundledSounds": true,
-  "customSoundsDir": "~/my-sounds",
+  "customSoundsDir": null,
+  "notifications": {
+    "enabled": true,
+    "timeout": 5
+  },
   "events": {
-    "complete": true,
-    "subagent_complete": false,
-    "error": true,
-    "permission": false
+    "complete": { "sound": true, "notification": true },
+    "subagent_complete": { "sound": false, "notification": false },
+    "error": { "sound": true, "notification": true },
+    "permission": { "sound": false, "notification": false }
+  },
+  "messages": {
+    "complete": "Sessie voltooid!",
+    "subagent_complete": "Subagent klaar",
+    "error": "Er is een fout opgetreden",
+    "permission": "Permissie nodig"
   }
 }
 ```
@@ -73,10 +85,43 @@ Maak `~/.config/opencode/probleemwijken.json`:
 | `enabled` | boolean | `true` | Plugin aan/uit |
 | `includeBundledSounds` | boolean | `true` | Probleemwijken geluiden gebruiken |
 | `customSoundsDir` | string | `null` | Pad naar folder met eigen geluiden |
-| `events.complete` | boolean | `true` | Geluid bij voltooide sessie |
-| `events.subagent_complete` | boolean | `false` | Geluid bij voltooide subagent |
-| `events.error` | boolean | `true` | Geluid bij error |
-| `events.permission` | boolean | `false` | Geluid bij permission request |
+| `notifications.enabled` | boolean | `true` | Notificaties aan/uit |
+| `notifications.timeout` | number | `5` | Notificatie timeout in seconden (Linux) |
+
+### Events
+
+Per event kun je sound en notification apart aan/uit zetten:
+
+```json
+{
+  "events": {
+    "complete": { "sound": true, "notification": true },
+    "error": { "sound": true, "notification": false }
+  }
+}
+```
+
+Of simpelweg een boolean voor beide:
+
+```json
+{
+  "events": {
+    "complete": true,
+    "error": false
+  }
+}
+```
+
+### Berichten aanpassen
+
+```json
+{
+  "messages": {
+    "complete": "Klaar!",
+    "error": "Oeps, er ging iets mis"
+  }
+}
+```
 
 ### Eigen geluiden toevoegen
 
