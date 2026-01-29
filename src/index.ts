@@ -1,9 +1,8 @@
 import type { Plugin, PluginInput } from "@opencode-ai/plugin"
 import { loadConfig, isSoundEnabled, isNotificationEnabled, getMessage } from "./config"
 import type { EventType, SoundboardConfig } from "./config"
-import { playRandomSound, playBoingSound } from "./sound"
+import { playRandomSound } from "./sound"
 import { sendNotification } from "./notify"
-import { isInMeeting } from "./calendar"
 
 function getSessionIDFromEvent(event: unknown): string | null {
   const sessionID = (event as any)?.properties?.sessionID
@@ -33,21 +32,11 @@ async function handleEvent(
 ): Promise<void> {
   const promises: Promise<void>[] = []
 
-  // Check if we're in a meeting (schaam-modus)
-  const inMeeting = await isInMeeting(config.schaamModus)
-
   if (isSoundEnabled(config, eventType)) {
-    if (inMeeting) {
-      // Schaam-modus: play subtle boing sound instead
-      promises.push(playBoingSound())
-    } else {
-      // Normal mode: play random Probleemwijken sound
-      promises.push(playRandomSound(config))
-    }
+    promises.push(playRandomSound(config))
   }
 
-  // Only show notifications if not in a meeting
-  if (isNotificationEnabled(config, eventType) && !inMeeting) {
+  if (isNotificationEnabled(config, eventType)) {
     const title = projectName ? `OpenCode (${projectName})` : "OpenCode"
     const message = getMessage(config, eventType)
     promises.push(sendNotification(title, message, config.notifications.timeout))

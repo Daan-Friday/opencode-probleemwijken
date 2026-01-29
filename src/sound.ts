@@ -25,22 +25,6 @@ function getBundledSoundsDir(): string | null {
   return null
 }
 
-function getBoingSoundPath(): string | null {
-  const bundledDir = getBundledSoundsDir()
-  if (!bundledDir) return null
-  
-  // Try different extensions
-  const extensions = [".wav", ".mp3"]
-  for (const ext of extensions) {
-    const boingPath = join(bundledDir, `boing${ext}`)
-    if (existsSync(boingPath)) {
-      return boingPath
-    }
-  }
-  
-  return null
-}
-
 function getSoundFilesFromDir(directory: string): string[] {
   if (!existsSync(directory)) {
     return []
@@ -160,7 +144,18 @@ async function playOnWindows(soundPath: string): Promise<void> {
   }
 }
 
-async function playSoundFile(soundPath: string): Promise<void> {
+export async function playRandomSound(config: SoundboardConfig): Promise<void> {
+  const sounds = getAllSoundFiles(config)
+
+  if (sounds.length === 0) {
+    return
+  }
+
+  const soundPath = getRandomSound(sounds)
+  if (!soundPath) {
+    return
+  }
+
   const os = platform()
 
   try {
@@ -180,28 +175,4 @@ async function playSoundFile(soundPath: string): Promise<void> {
   } catch {
     // Silent fail
   }
-}
-
-export async function playRandomSound(config: SoundboardConfig): Promise<void> {
-  const sounds = getAllSoundFiles(config)
-
-  if (sounds.length === 0) {
-    return
-  }
-
-  const soundPath = getRandomSound(sounds)
-  if (!soundPath) {
-    return
-  }
-
-  await playSoundFile(soundPath)
-}
-
-export async function playBoingSound(): Promise<void> {
-  const boingPath = getBoingSoundPath()
-  if (!boingPath) {
-    return
-  }
-  
-  await playSoundFile(boingPath)
 }
