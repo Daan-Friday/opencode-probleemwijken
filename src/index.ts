@@ -50,12 +50,12 @@ export const RandomSoundboardPlugin: Plugin = async ({ client, directory }) => {
   const projectName = directory ? directory.split("/").pop() ?? null : null
 
   return {
-    event: async ({ event }) => {
-      // Permission event
-      if (event.type === "permission.updated" || (event as any).type === "permission.asked") {
-        await handleEvent(config, "permission", projectName)
-      }
+    // Permission hook - triggered when OpenCode asks for permission
+    "permission.ask": async (_input, _output) => {
+      await handleEvent(config, "permission", projectName)
+    },
 
+    event: async ({ event }) => {
       // Session complete (idle)
       if (event.type === "session.idle") {
         const sessionID = getSessionIDFromEvent(event)

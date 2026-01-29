@@ -41,7 +41,7 @@ const DEFAULT_CONFIG: SoundboardConfig = {
     complete: { sound: true, notification: true },
     subagent_complete: { sound: false, notification: false },
     error: { sound: true, notification: true },
-    permission: { sound: false, notification: false },
+    permission: { sound: true, notification: true },
   },
   messages: {
     complete: "Sessie voltooid!",
