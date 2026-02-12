@@ -1,5 +1,5 @@
 import { platform } from "os"
-import { join, dirname, extname } from "path"
+import { join, dirname, extname, basename, resolve } from "path"
 import { fileURLToPath } from "url"
 import { existsSync, readdirSync } from "fs"
 import { spawn } from "child_process"
@@ -43,6 +43,21 @@ function getSoundFilesFromDir(directory: string): string[] {
   }
 }
 
+function isSoundDisabled(soundPath: string, disabledSounds: string[]): boolean {
+  if (disabledSounds.length === 0) return false
+
+  const fileName = basename(soundPath)
+  const resolvedPath = resolve(soundPath)
+
+  return disabledSounds.some((disabled) => {
+    // Match by filename (e.g. "koffie.mp3")
+    if (disabled === fileName) return true
+    // Match by full/resolved path (e.g. "/Users/.../sounds/koffie.mp3")
+    if (resolve(disabled) === resolvedPath) return true
+    return false
+  })
+}
+
 function getAllSoundFiles(config: SoundboardConfig): string[] {
   const allSounds: string[] = []
 
@@ -57,6 +72,11 @@ function getAllSoundFiles(config: SoundboardConfig): string[] {
   // Add custom sounds if directory is configured
   if (config.customSoundsDir && existsSync(config.customSoundsDir)) {
     allSounds.push(...getSoundFilesFromDir(config.customSoundsDir))
+  }
+
+  // Filter out disabled sounds
+  if (config.disabledSounds && config.disabledSounds.length > 0) {
+    return allSounds.filter((sound) => !isSoundDisabled(sound, config.disabledSounds))
   }
 
   return allSounds

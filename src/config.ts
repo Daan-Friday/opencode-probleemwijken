@@ -11,6 +11,7 @@ export interface SoundboardConfig {
   enabled: boolean
   customSoundsDir: string | null // Custom sounds directory for your own sounds
   includeBundledSounds: boolean // Include the bundled Probleemwijken sounds
+  disabledSounds: string[] // Disable specific sounds by filename (e.g. "koffie.mp3") or full path
   notifications: {
     enabled: boolean
     timeout: number // Notification timeout in seconds (Linux only)
@@ -33,6 +34,7 @@ const DEFAULT_CONFIG: SoundboardConfig = {
   enabled: true,
   customSoundsDir: null,
   includeBundledSounds: true,
+  disabledSounds: [],
   notifications: {
     enabled: true,
     timeout: 5,
@@ -94,6 +96,7 @@ export function loadConfig(): SoundboardConfig {
       enabled: userConfig.enabled ?? DEFAULT_CONFIG.enabled,
       customSoundsDir: userConfig.customSoundsDir ?? DEFAULT_CONFIG.customSoundsDir,
       includeBundledSounds: userConfig.includeBundledSounds ?? DEFAULT_CONFIG.includeBundledSounds,
+      disabledSounds: Array.isArray(userConfig.disabledSounds) ? userConfig.disabledSounds : DEFAULT_CONFIG.disabledSounds,
       notifications: {
         enabled: userConfig.notifications?.enabled ?? DEFAULT_CONFIG.notifications.enabled,
         timeout: userConfig.notifications?.timeout ?? DEFAULT_CONFIG.notifications.timeout,
