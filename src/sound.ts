@@ -69,6 +69,17 @@ function getAllSoundFiles(config: SoundboardConfig): string[] {
     }
   }
 
+  // Add Gen Z sounds if enabled
+  if (config.includeGenZSounds) {
+    const bundledDir = getBundledSoundsDir()
+    if (bundledDir) {
+      const genZDir = join(bundledDir, "gen-z")
+      if (existsSync(genZDir)) {
+        allSounds.push(...getSoundFilesFromDir(genZDir))
+      }
+    }
+  }
+
   // Add custom sounds if directory is configured
   if (config.customSoundsDir && existsSync(config.customSoundsDir)) {
     allSounds.push(...getSoundFilesFromDir(config.customSoundsDir))
