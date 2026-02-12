@@ -59,6 +59,7 @@ Maak `~/.config/opencode/probleemwijken.json`:
   "enabled": true,
   "includeBundledSounds": true,
   "customSoundsDir": null,
+  "disabledSounds": [],
   "notifications": {
     "enabled": true,
     "timeout": 5
@@ -85,6 +86,7 @@ Maak `~/.config/opencode/probleemwijken.json`:
 | `enabled` | boolean | `true` | Plugin aan/uit |
 | `includeBundledSounds` | boolean | `true` | Probleemwijken geluiden gebruiken |
 | `customSoundsDir` | string | `null` | Pad naar folder met eigen geluiden |
+| `disabledSounds` | string[] | `[]` | Specifieke geluiden uitschakelen op naam of pad |
 | `notifications.enabled` | boolean | `true` | Notificaties aan/uit |
 | `notifications.timeout` | number | `5` | Notificatie timeout in seconden (Linux) |
 
@@ -135,6 +137,22 @@ Of simpelweg een boolean voor beide:
 ```
 
 De plugin kiest dan random uit zowel de Probleemwijken geluiden als je eigen geluiden.
+
+### Specifieke geluiden uitschakelen
+
+Je kunt specifieke geluiden uitschakelen op bestandsnaam of volledig pad:
+
+```json
+{
+  "disabledSounds": [
+    "koffie.mp3",
+    "narcist.mp3",
+    "/home/user/my-sounds/annoying.mp3"
+  ]
+}
+```
+
+Met alleen een bestandsnaam (bv. `"koffie.mp3"`) wordt het geluid overal uitgefilterd, zowel uit de bundled als custom sounds. Met een volledig pad filter je alleen dat specifieke bestand.
 
 ### Alleen eigen geluiden gebruiken
 
