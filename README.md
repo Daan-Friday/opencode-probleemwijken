@@ -58,7 +58,6 @@ Maak `~/.config/opencode/probleemwijken.json`:
 {
   "enabled": true,
   "includeBundledSounds": true,
-  "includeGenZSounds": true,
   "customSoundsDir": null,
   "disabledSounds": [],
   "notifications": {
@@ -86,7 +85,6 @@ Maak `~/.config/opencode/probleemwijken.json`:
 |-------|------|---------|--------------|
 | `enabled` | boolean | `true` | Plugin aan/uit |
 | `includeBundledSounds` | boolean | `true` | Probleemwijken geluiden gebruiken |
-| `includeGenZSounds` | boolean | `true` | Gen Z geluiden gebruiken |
 | `customSoundsDir` | string | `null` | Pad naar folder met eigen geluiden |
 | `disabledSounds` | string[] | `[]` | Specifieke geluiden uitschakelen op naam of pad |
 | `notifications.enabled` | boolean | `true` | Notificaties aan/uit |
@@ -139,16 +137,6 @@ Of simpelweg een boolean voor beide:
 ```
 
 De plugin kiest dan random uit zowel de Probleemwijken geluiden als je eigen geluiden.
-
-### Gen Z geluiden uitschakelen
-
-De 36 Gen Z geluiden (toegevoegd in v1.6) zitten in een aparte `sounds/gen-z/` folder en kunnen in zijn geheel worden uitgeschakeld:
-
-```json
-{
-  "includeGenZSounds": false
-}
-```
 
 ### Specifieke geluiden uitschakelen
 

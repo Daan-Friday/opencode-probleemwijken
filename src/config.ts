@@ -11,7 +11,6 @@ export interface SoundboardConfig {
   enabled: boolean
   customSoundsDir: string | null // Custom sounds directory for your own sounds
   includeBundledSounds: boolean // Include the bundled Probleemwijken sounds
-  includeGenZSounds: boolean // Include the Gen Z sounds
   disabledSounds: string[] // Disable specific sounds by filename (e.g. "koffie.mp3") or full path
   notifications: {
     enabled: boolean
@@ -35,7 +34,6 @@ const DEFAULT_CONFIG: SoundboardConfig = {
   enabled: true,
   customSoundsDir: null,
   includeBundledSounds: true,
-  includeGenZSounds: true,
   disabledSounds: [],
   notifications: {
     enabled: true,
@@ -98,7 +96,6 @@ export function loadConfig(): SoundboardConfig {
       enabled: userConfig.enabled ?? DEFAULT_CONFIG.enabled,
       customSoundsDir: userConfig.customSoundsDir ?? DEFAULT_CONFIG.customSoundsDir,
       includeBundledSounds: userConfig.includeBundledSounds ?? DEFAULT_CONFIG.includeBundledSounds,
-      includeGenZSounds: userConfig.includeGenZSounds ?? DEFAULT_CONFIG.includeGenZSounds,
       disabledSounds: Array.isArray(userConfig.disabledSounds) ? userConfig.disabledSounds : DEFAULT_CONFIG.disabledSounds,
       notifications: {
         enabled: userConfig.notifications?.enabled ?? DEFAULT_CONFIG.notifications.enabled,
