@@ -55,7 +55,50 @@ const DEFAULT_CONFIG: SoundboardConfig = {
 
 export type EventType = "complete" | "subagent_complete" | "error" | "permission"
 
-export function loadConfig(): SoundboardConfig {
+/**
+ * Layer a raw (untrusted) config object over a resolved base config.
+ * Unknown/missing keys fall through to `base`.
+ */
+function mergeConfig(base: SoundboardConfig, userConfig: any): SoundboardConfig {
+  // Helper to parse event config (supports both boolean and {sound, notification} format)
+  const parseEventConfig = (value: any, defaultValue: EventConfig): EventConfig => {
+    if (typeof value === "boolean") {
+      return { sound: value, notification: value }
+    }
+    if (typeof value === "object" && value !== null) {
+      return {
+        sound: value.sound ?? defaultValue.sound,
+        notification: value.notification ?? defaultValue.notification,
+      }
+    }
+    return defaultValue
+  }
+
+  return {
+    enabled: userConfig.enabled ?? base.enabled,
+    customSoundsDir: userConfig.customSoundsDir ?? base.customSoundsDir,
+    includeBundledSounds: userConfig.includeBundledSounds ?? base.includeBundledSounds,
+    disabledSounds: Array.isArray(userConfig.disabledSounds) ? userConfig.disabledSounds : base.disabledSounds,
+    notifications: {
+      enabled: userConfig.notifications?.enabled ?? base.notifications.enabled,
+      timeout: userConfig.notifications?.timeout ?? base.notifications.timeout,
+    },
+    events: {
+      complete: parseEventConfig(userConfig.events?.complete, base.events.complete),
+      subagent_complete: parseEventConfig(userConfig.events?.subagent_complete, base.events.subagent_complete),
+      error: parseEventConfig(userConfig.events?.error, base.events.error),
+      permission: parseEventConfig(userConfig.events?.permission, base.events.permission),
+    },
+    messages: {
+      complete: userConfig.messages?.complete ?? base.messages.complete,
+      subagent_complete: userConfig.messages?.subagent_complete ?? base.messages.subagent_complete,
+      error: userConfig.messages?.error ?? base.messages.error,
+      permission: userConfig.messages?.permission ?? base.messages.permission,
+    },
+  }
+}
+
+function loadFileConfig(): SoundboardConfig {
   // Try both config file names for compatibility
   const configPaths = [
     join(homedir(), ".config", "opencode", "probleemwijken.json"),
@@ -76,46 +119,32 @@ export function loadConfig(): SoundboardConfig {
 
   try {
     const content = readFileSync(configPath, "utf-8")
-    const userConfig = JSON.parse(content)
-
-    // Helper to parse event config (supports both boolean and {sound, notification} format)
-    const parseEventConfig = (value: any, defaultValue: EventConfig): EventConfig => {
-      if (typeof value === "boolean") {
-        return { sound: value, notification: value }
-      }
-      if (typeof value === "object" && value !== null) {
-        return {
-          sound: value.sound ?? defaultValue.sound,
-          notification: value.notification ?? defaultValue.notification,
-        }
-      }
-      return defaultValue
-    }
-
-    return {
-      enabled: userConfig.enabled ?? DEFAULT_CONFIG.enabled,
-      customSoundsDir: userConfig.customSoundsDir ?? DEFAULT_CONFIG.customSoundsDir,
-      includeBundledSounds: userConfig.includeBundledSounds ?? DEFAULT_CONFIG.includeBundledSounds,
-      disabledSounds: Array.isArray(userConfig.disabledSounds) ? userConfig.disabledSounds : DEFAULT_CONFIG.disabledSounds,
-      notifications: {
-        enabled: userConfig.notifications?.enabled ?? DEFAULT_CONFIG.notifications.enabled,
-        timeout: userConfig.notifications?.timeout ?? DEFAULT_CONFIG.notifications.timeout,
-      },
-      events: {
-        complete: parseEventConfig(userConfig.events?.complete, DEFAULT_CONFIG.events.complete),
-        subagent_complete: parseEventConfig(userConfig.events?.subagent_complete, DEFAULT_CONFIG.events.subagent_complete),
-        error: parseEventConfig(userConfig.events?.error, DEFAULT_CONFIG.events.error),
-        permission: parseEventConfig(userConfig.events?.permission, DEFAULT_CONFIG.events.permission),
-      },
-      messages: {
-        complete: userConfig.messages?.complete ?? DEFAULT_CONFIG.messages.complete,
-        subagent_complete: userConfig.messages?.subagent_complete ?? DEFAULT_CONFIG.messages.subagent_complete,
-        error: userConfig.messages?.error ?? DEFAULT_CONFIG.messages.error,
-        permission: userConfig.messages?.permission ?? DEFAULT_CONFIG.messages.permission,
-      },
-    }
+    return mergeConfig(DEFAULT_CONFIG, JSON.parse(content))
   } catch {
     return DEFAULT_CONFIG
+  }
+}
+
+/**
+ * Resolve the effective config. Layers are applied last-wins:
+ *
+ *   1. built-in defaults
+ *   2. ~/.config/opencode/probleemwijken.json (or random-soundboard.json)
+ *   3. plugin options — OpenCode 2 `ctx.options`, OpenCode 1 plugin options
+ *
+ * Passing no options reproduces the pre-2.0 behaviour exactly.
+ */
+export function loadConfig(options?: Readonly<Record<string, unknown>> | null): SoundboardConfig {
+  const base = loadFileConfig()
+
+  if (!options || typeof options !== "object" || Object.keys(options).length === 0) {
+    return base
+  }
+
+  try {
+    return mergeConfig(base, options)
+  } catch {
+    return base
   }
 }
 

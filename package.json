@@ -1,7 +1,7 @@
 {
   "name": "opencode-probleemwijken",
-  "version": "1.9.0",
-  "description": "OpenCode plugin that plays random Probleemwijken/Derkolk sounds and sends push notifications when a session completes",
+  "version": "2.0.0",
+  "description": "OpenCode plugin that plays random Probleemwijken/Derkolk sounds and sends push notifications when a session completes. Supports OpenCode 2 and OpenCode 1.",
   "author": "Daan-Friday",
   "license": "MIT",
   "type": "module",
@@ -20,13 +20,14 @@
     "sounds"
   ],
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --target node",
+    "build": "bun build src/index.ts --outdir dist --target node --packages external && tsc --emitDeclarationOnly",
     "prepublishOnly": "bun run build",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "opencode",
     "opencode-plugin",
+    "opencode-2",
     "soundboard",
     "random",
     "sound",
@@ -36,12 +37,12 @@
     "harrykoster",
     "gen-z"
   ],
-  "devDependencies": {
-    "@opencode-ai/plugin": "^1.0.224",
-    "@types/node": "^22.0.0",
-    "typescript": "^5.0.0"
+  "dependencies": {
+    "@opencode/plugin": "^2.0.3"
   },
-  "peerDependencies": {
-    "@opencode-ai/plugin": ">=1.0.0"
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.18.31",
+    "@types/node": "^22.20.2",
+    "typescript": "^7.0.2"
   }
 }
