@@ -1,6 +1,6 @@
 {
   "name": "opencode-probleemwijken",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "OpenCode plugin that plays random Probleemwijken/Derkolk sounds and sends push notifications when a session completes. Supports OpenCode 2 and OpenCode 1.",
   "author": "Daan-Friday",
   "license": "MIT",
